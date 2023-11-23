@@ -334,6 +334,32 @@ extension Map {
             }
         }
 
+        func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+            print("something selected")
+            if let clustered = view.annotation as? MKClusterAnnotation {
+                // mapView.showAnnotations(groupedAnnotations, animated: true)
+                        var minLat = CLLocationDegrees(exactly: 90)!
+                        var maxLat = CLLocationDegrees(exactly: -90)!
+                        var minLong = CLLocationDegrees(exactly: 180)!
+                        var maxLong = CLLocationDegrees(exactly: -180)!
+                        clustered.memberAnnotations.forEach { (annotation) in
+                            let coordinate = annotation.coordinate
+                            minLat = min(minLat, coordinate.latitude)
+                            maxLat = max(maxLat, coordinate.latitude)
+                            minLong = min(minLong, coordinate.longitude)
+                            maxLong = max(maxLong, coordinate.longitude)
+                        }
+
+                        let centerLat = (minLat + maxLat) / 2
+                        let centerLong = (minLong + maxLong) / 2
+                        let center = CLLocationCoordinate2D(latitude: centerLat, longitude: centerLong)
+                        let span = MKCoordinateSpan(latitudeDelta: (maxLat - minLat) * 1.5, longitudeDelta: (maxLong - minLong) * 1.5) // with some padding
+                        let region = MKCoordinateRegion(center: center, span: span)
+
+                        mapView.setRegion(region, animated: true)
+                }
+        }
+
         public func mapView(_ mapView: MKMapView, clusterAnnotationForMemberAnnotations memberAnnotations: [MKAnnotation]) -> MKClusterAnnotation {
             MKClusterAnnotation(memberAnnotations: memberAnnotations)
         }
